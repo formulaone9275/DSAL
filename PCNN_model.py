@@ -424,6 +424,9 @@ class Train(object):
         self.save_model = FLAGS.save_model
         self.name = FLAGS.name
         self.dev_f_score=[]
+        self.test_f_score=[]
+        self.test_precision=[]
+        self.test_recall=[]
         self.folder_name=folder_name
         self.log_dir='log'
 
@@ -489,6 +492,9 @@ class Train(object):
 
         print('AIMed test : prec {}, recall {}, fscore {}, loss {}'.format(
              p, r, f, l))
+        self.test_f_score.append(f)
+        self.test_precision.append(p)
+        self.test_recall.append(r)
 
 
     def train(self, train_data, eval_sets):
@@ -550,7 +556,7 @@ class Train(object):
 
                     step += 1
 
-                print(self.dev_f_score)
+                print(self.test_f_score)
 
     def MI_train(self, train_data, eval_sets):
         with tf.Graph().as_default():
@@ -658,3 +664,12 @@ if __name__ == '__main__':
             train.train('data/'+rela+'/'+folder_name+'/'+folder_name+'_train_*.tfrecords',
                         [('dev', 'data/'+rela+'/'+folder_name+'_train_dev.tfrecords')])
 
+            with open('model/'+rela+'_'+folder_name+'_fscore.pickle', 'wb') as f:
+                # Pickle the 'data' dictionary using the highest protocol available.
+                pickle.dump(train.test_f_score, f, pickle.HIGHEST_PROTOCOL)
+            with open('model/'+rela+'_'+folder_name+'_precision.pickle', 'wb') as f:
+                # Pickle the 'data' dictionary using the highest protocol available.
+                pickle.dump(train.test_precision, f, pickle.HIGHEST_PROTOCOL)
+            with open('model/'+rela+'_'+folder_name+'_recall.pickle', 'wb') as f:
+                # Pickle the 'data' dictionary using the highest protocol available.
+                pickle.dump(train.test_recall, f, pickle.HIGHEST_PROTOCOL)
